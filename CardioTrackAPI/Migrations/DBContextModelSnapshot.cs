@@ -37,7 +37,19 @@ namespace CardioTrackAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1)");
+
                     b.Property<string>("Names")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Specialty")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -55,7 +67,7 @@ namespace CardioTrackAPI.Migrations
                     b.ToTable("Doctor");
                 });
 
-            modelBuilder.Entity("CardioTrackAPI.Model.Exam", b =>
+            modelBuilder.Entity("CardioTrackAPI.Model.DoctorPatients", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -69,17 +81,7 @@ namespace CardioTrackAPI.Migrations
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PatientAge")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PatientGenre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1)");
-
                     b.Property<long>("PatientId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("PersonalBackgroundId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -88,12 +90,10 @@ namespace CardioTrackAPI.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.HasIndex("PersonalBackgroundId");
-
-                    b.ToTable("Exam");
+                    b.ToTable("DoctorPatients");
                 });
 
-            modelBuilder.Entity("CardioTrackAPI.Model.OtherPersonalBackground", b =>
+            modelBuilder.Entity("CardioTrackAPI.Model.Exam", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,18 +101,26 @@ namespace CardioTrackAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("EvaluationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InterventionProposed")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("PersonalBackgroundId")
+                    b.Property<long>("PatientId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonalBackgroundId");
+                    b.HasIndex("DoctorId");
 
-                    b.ToTable("OtherPersonalBackground");
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Exam");
                 });
 
             modelBuilder.Entity("CardioTrackAPI.Model.PasswordRecoverToken", b =>
@@ -158,9 +166,15 @@ namespace CardioTrackAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long?>("DoctorId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Genre")
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
+
+                    b.Property<bool>("IsBeingEvaluated")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Names")
                         .IsRequired()
@@ -188,6 +202,9 @@ namespace CardioTrackAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<bool>("Abortion")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("Angina")
                         .HasColumnType("bit");
 
@@ -195,6 +212,9 @@ namespace CardioTrackAPI.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("Asthma")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Caesarean")
                         .HasColumnType("bit");
 
                     b.Property<bool>("Chagas")
@@ -206,22 +226,51 @@ namespace CardioTrackAPI.Migrations
                     b.Property<bool>("Dyslipidemia")
                         .HasColumnType("bit");
 
+                    b.Property<long>("ExamId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("FamilyBackground")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FamilyBackgroundList")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("For")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GestationWeeks")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Homeopathy")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LiverDisease")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("MedicineAllergy")
+                    b.Property<bool>("MedicinesAllergies")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MedicinesAllergiesList")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("MyocardialInfarction")
                         .HasColumnType("bit");
 
-                    b.Property<long>("ObstetricId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("OtherPersonalBackground")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassMedicines")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Pneumopathy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Stillbirth")
                         .HasColumnType("bit");
 
                     b.Property<bool>("Stroke")
@@ -231,6 +280,7 @@ namespace CardioTrackAPI.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("SurgeryType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Thyroidopathy")
@@ -239,106 +289,16 @@ namespace CardioTrackAPI.Migrations
                     b.Property<bool>("Toxics")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ToxicsList")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ObstetricId");
+                    b.HasIndex("ExamId")
+                        .IsUnique();
 
                     b.ToTable("PersonalBackground");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundMedicine", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("PersonalBackgroundId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonalBackgroundId");
-
-                    b.ToTable("PersonalBackgroundMedicine");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundMedicineAllergy", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("PersonalBackgroundId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonalBackgroundId");
-
-                    b.ToTable("PersonalBackgroundMedicineAllergy");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundObstetric", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("Abortion")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Caesarean")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("For")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1)");
-
-                    b.Property<int>("GestationWeeks")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Stillbirth")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PersonalBackgroundObstetric");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundToxics", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("PersonalBackgroundId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonalBackgroundId");
-
-                    b.ToTable("PersonalBackgroundToxic");
                 });
 
             modelBuilder.Entity("CardioTrackAPI.Model.Rol", b =>
@@ -356,6 +316,80 @@ namespace CardioTrackAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Rol");
+                });
+
+            modelBuilder.Entity("CardioTrackAPI.Model.Treatment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("AdditionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DurationParameter")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ExamId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PatientId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("TreatmentEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TreatmentStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Treatment");
+                });
+
+            modelBuilder.Entity("CardioTrackAPI.Model.TreatmentMedicines", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DurationParatemeter")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MedicineName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TakeEvery")
+                        .HasColumnType("int");
+
+                    b.Property<long>("TreatmentId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TreatmentId");
+
+                    b.ToTable("TreatmentMedicine");
                 });
 
             modelBuilder.Entity("CardioTrackAPI.Model.User", b =>
@@ -398,6 +432,25 @@ namespace CardioTrackAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CardioTrackAPI.Model.DoctorPatients", b =>
+                {
+                    b.HasOne("CardioTrackAPI.Model.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CardioTrackAPI.Model.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("CardioTrackAPI.Model.Exam", b =>
                 {
                     b.HasOne("CardioTrackAPI.Model.Doctor", "Doctor")
@@ -412,28 +465,9 @@ namespace CardioTrackAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackground", "PersonalBackground")
-                        .WithMany()
-                        .HasForeignKey("PersonalBackgroundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
-
-                    b.Navigation("PersonalBackground");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.OtherPersonalBackground", b =>
-                {
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackground", "personalBackground")
-                        .WithMany()
-                        .HasForeignKey("PersonalBackgroundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("personalBackground");
                 });
 
             modelBuilder.Entity("CardioTrackAPI.Model.PasswordRecoverToken", b =>
@@ -460,46 +494,43 @@ namespace CardioTrackAPI.Migrations
 
             modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackground", b =>
                 {
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackgroundObstetric", "Obstetric")
-                        .WithMany()
-                        .HasForeignKey("ObstetricId")
+                    b.HasOne("CardioTrackAPI.Model.Exam", "Exam")
+                        .WithOne("personalBackground")
+                        .HasForeignKey("CardioTrackAPI.Model.PersonalBackground", "ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Obstetric");
+                    b.Navigation("Exam");
                 });
 
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundMedicine", b =>
+            modelBuilder.Entity("CardioTrackAPI.Model.Treatment", b =>
                 {
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackground", "PersonalBackground")
+                    b.HasOne("CardioTrackAPI.Model.Exam", "Exam")
                         .WithMany()
-                        .HasForeignKey("PersonalBackgroundId")
+                        .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PersonalBackground");
+                    b.HasOne("CardioTrackAPI.Model.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundMedicineAllergy", b =>
+            modelBuilder.Entity("CardioTrackAPI.Model.TreatmentMedicines", b =>
                 {
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackground", "PersonalBackground")
-                        .WithMany()
-                        .HasForeignKey("PersonalBackgroundId")
+                    b.HasOne("CardioTrackAPI.Model.Treatment", "Treatment")
+                        .WithMany("treatmentMedicines")
+                        .HasForeignKey("TreatmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PersonalBackground");
-                });
-
-            modelBuilder.Entity("CardioTrackAPI.Model.PersonalBackgroundToxics", b =>
-                {
-                    b.HasOne("CardioTrackAPI.Model.PersonalBackground", "PersonalBackground")
-                        .WithMany()
-                        .HasForeignKey("PersonalBackgroundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PersonalBackground");
+                    b.Navigation("Treatment");
                 });
 
             modelBuilder.Entity("CardioTrackAPI.Model.User", b =>
@@ -511,6 +542,16 @@ namespace CardioTrackAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Rol");
+                });
+
+            modelBuilder.Entity("CardioTrackAPI.Model.Exam", b =>
+                {
+                    b.Navigation("personalBackground");
+                });
+
+            modelBuilder.Entity("CardioTrackAPI.Model.Treatment", b =>
+                {
+                    b.Navigation("treatmentMedicines");
                 });
 #pragma warning restore 612, 618
         }

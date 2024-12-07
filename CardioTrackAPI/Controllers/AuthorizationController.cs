@@ -1,6 +1,8 @@
 ﻿using CardioTrackAPI.Data;
 using CardioTrackAPI.Model;
 using CardioTrackAPI.Model.Dtos;
+using CardioTrackAPI.Model.Dtos.Doctor;
+using CardioTrackAPI.Model.Dtos.Patient;
 using CardioTrackAPI.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +20,19 @@ namespace CardioTrackAPI.Controllers
 		private readonly DBContext _dbContext;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IForgotPasswordService _forgotPasswordService;
+        private readonly IDoctorService _doctorService;
+        private readonly IPatientService _patientService;
 
-		public AuthorizationController(DBContext dbContext, IHttpContextAccessor httpContextAccessor, IForgotPasswordService forgotPasswordService)
+        public AuthorizationController(DBContext dbContext, IHttpContextAccessor httpContextAccessor, IForgotPasswordService forgotPasswordService,
+			IDoctorService doctorService, IPatientService patientService)
         {
 			_dbContext = dbContext;
+
 			_httpContextAccessor = httpContextAccessor;
 			_forgotPasswordService = forgotPasswordService;
-		}
+            _doctorService = doctorService;
+            _patientService = patientService;
+        }
 
         [HttpPost]
 		[Route("Login")]
@@ -86,13 +94,27 @@ namespace CardioTrackAPI.Controllers
 
 			if(user == null) return BaseResponse<UserDataDto>.GetError("User not found", HttpStatusCode.NotFound);
 
+			DoctorDto? doctorRelatedToUser = null;
+			if(user.RolId == int.Parse(Roles.Doctor))
+			{
+				var resp = await _doctorService.GetDoctorByUserIdAsync(user.Id);
+				doctorRelatedToUser = resp.Data;
+			}
+			PatientDto? patientRelatedToUser = null;
+			if(user.RolId == int.Parse(Roles.Patient))
+			{
+                var resp = await _patientService.GetPatientByUserIdAsync(user.Id);
+                patientRelatedToUser = resp.Data;
+            }
 			UserDataDto userDataDto = new UserDataDto
 			{
 				Email = user.Email,
 				Id = user.Id.ToString(),
 				RolId = user.RolId,
-				RolName = user.Rol!.Name
-			};
+				RolName = user.Rol!.Name,
+				Patient = patientRelatedToUser,
+				Doctor = doctorRelatedToUser
+            };
 			return Ok(BaseResponse<UserDataDto>.GetSuccess("Ok", userDataDto, HttpStatusCode.OK));
 		}
 

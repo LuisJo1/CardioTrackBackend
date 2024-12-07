@@ -10,5 +10,8 @@
 		public long UserId { get; set; }
 		public char Genre { get; set; }
 		public User? User { get; set; }
+		public bool IsBeingEvaluated { get; set; }
+		public long? DoctorId { get; set; }
+		public Doctor? Doctor { get; set; }
 	}
 }

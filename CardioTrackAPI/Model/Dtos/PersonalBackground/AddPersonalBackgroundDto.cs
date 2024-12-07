@@ -15,7 +15,7 @@
 		public bool Chagas { get; set; }
 		public bool Thyroidopathy { get; set; }
 		public bool Surgery { get; set; }
-		public string? SurgeryType { get; set; }
+		public string SurgeryType { get; set; } = string.Empty;
 		public AddPersonalBackgroundObstetricDto? Obstetric { get; set; }
 		public bool MedicineAllergy { get; set; }
 		public List<string>? AllergicMedicines { get; set; }
@@ -23,6 +23,8 @@
 		public List<string>? ToxicsList { get; set; }
 		public List<string>? OtherPersonalBackground { get; set; }
 		public List<string>? Medicines { get; set; }
+		public bool FamilyBackground { get; set; }
+		public List<string>? FamilyBackgroundList { get; set; }
 
 	}
 }

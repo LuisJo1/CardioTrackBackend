@@ -22,6 +22,8 @@ namespace CardioTrackAPI
 			builder.Services.AddScoped<IPatientService, PatientService>();
 			builder.Services.AddScoped<IExamService, ExamService>();
 			builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
+			builder.Services.AddScoped<IDoctorPatientsService, DoctorPatientsService>();
+			builder.Services.AddScoped<ITreatmentService, TreatmentService>();
 
 			builder.Services.AddAuthentication("cookie")
 				.AddCookie("cookie", options =>
@@ -29,7 +31,8 @@ namespace CardioTrackAPI
 					options.Events.OnRedirectToAccessDenied = context =>
 					{
 						context.Response.StatusCode = 403;
-						var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("User doesn't meet the required permissions", System.Net.HttpStatusCode.Forbidden)));
+						var bytes = 
+						Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("User doesn't meet the required permissions", System.Net.HttpStatusCode.Forbidden)));
 						context.Response.ContentType = "application/json";
 						context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
 						return Task.CompletedTask;
@@ -38,7 +41,8 @@ namespace CardioTrackAPI
 					options.Events.OnRedirectToLogin = context =>
 					{
 						context.Response.StatusCode = 401;
-						var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("Unauthorized", System.Net.HttpStatusCode.Unauthorized)));
+						var bytes = 
+						Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("Unauthorized", System.Net.HttpStatusCode.Unauthorized)));
 						context.Response.ContentType = "application/json";
 						context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
 						return Task.CompletedTask;
@@ -58,7 +62,7 @@ namespace CardioTrackAPI
 			{
 				pb.AddPolicy("app-cors", options =>
 				{
-					options.WithOrigins("http://localhost:4200");
+					options.WithOrigins("http://localhost:5173");
 					options.AllowCredentials();
 					options.AllowAnyHeader();
 					options.AllowAnyMethod();

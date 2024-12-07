@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tnsigkO5g4srKOrfNjaO1/IQb9vSmlHU2oEXt1SwNgNfWMxcBRtdGhyHP5/dVodny0HIX/TwuyiHgrpGQ7JPXQ==",
+  "dgSpecHash": "364a+Wx0saQ2Fjendo4abTOu22UJD31EyfZDAC4PFPd2TRurqKNZUQR+Uhx83WPlz9jgHB250i7VorPvdKtuIg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\CardioTrackAPI.csproj",
+  "projectFilePath": "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\rodri\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\rodri\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

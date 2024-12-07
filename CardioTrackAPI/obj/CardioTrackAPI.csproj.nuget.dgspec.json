@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\CardioTrackAPI.csproj": {}
+    "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\CardioTrackAPI.csproj": {
+    "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\CardioTrackAPI.csproj",
+        "projectUniqueName": "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj",
         "projectName": "CardioTrackAPI",
-        "projectPath": "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\CardioTrackAPI.csproj",
+        "projectPath": "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj",
         "packagesPath": "C:\\Users\\rodri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rodri\\source\\repos\\Luis'sFriendsAPI\\Luis'sFriendsAPI\\obj\\",
+        "outputPath": "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\rodri\\AppData\\Roaming\\NuGet\\NuGet.Config",

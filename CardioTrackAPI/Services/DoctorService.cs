@@ -66,8 +66,12 @@ namespace CardioTrackAPI.Services
 				{
 					throw new ArgumentException("Borndate is required");
 				}
-				
-				User userToAdd = new User()
+                if (addDoctorRequest.Genre != "M" && addDoctorRequest.Genre != "F")
+                {
+                    throw new ArgumentException("Genre is invalid");
+                }
+
+                User userToAdd = new User()
 				{
 					Email = addDoctorRequest.Email,
 					Password = BCrypt.Net.BCrypt.HashPassword(addDoctorRequest.Password),
@@ -83,7 +87,10 @@ namespace CardioTrackAPI.Services
 					CI = addDoctorRequest.CI,
 					Names = addDoctorRequest.Names,
 					Surnames = addDoctorRequest.Surnames,
-					UserId = userToAdd.Id
+					UserId = userToAdd.Id,
+					Specialty = addDoctorRequest.Specialty,
+					Genre = char.Parse(addDoctorRequest.Genre),
+					PhoneNumber = addDoctorRequest.PhoneNumber
 				};
 
 				_dBContext.Doctor.Add(doctorToAdd);
@@ -144,12 +151,16 @@ namespace CardioTrackAPI.Services
 				}
 				DoctorDto doctorDto = new DoctorDto
 				{
+					Id = doctor.Id,
 					BornDate = doctor.BornDate,
 					CI = doctor.CI,
 					Email = doctor.User?.Email ?? "",
 					Names = doctor.Names,
-					Surnames = doctor.Surnames
-				};
+					Surnames = doctor.Surnames,
+					Specialty = doctor.Specialty,
+					Genre = doctor.Genre.ToString(),
+                    PhoneNumber = doctor.PhoneNumber
+                };
 				return BaseResponse<DoctorDto>.GetSuccess("Ok", doctorDto, HttpStatusCode.OK);
 			}
 			catch (Exception ex)
@@ -158,7 +169,39 @@ namespace CardioTrackAPI.Services
 			}
 		}
 
-		public async Task<BaseResponse<string>> PatchDoctorAsync(long doctorId, PatchDoctorDto patchDoctorRequest)
+        public async Task<BaseResponse<DoctorDto>> GetDoctorByUserIdAsync(long userId)
+        {
+            try
+            {
+                Doctor? doctor = await _dBContext.Doctor
+                    .Include(doctor => doctor.User)
+                    .Where(doctor => doctor.UserId == userId)
+                    .FirstOrDefaultAsync();
+                if (doctor is null)
+                {
+                    return BaseResponse<DoctorDto>.GetError("Couldn't find a doctor with the given id", HttpStatusCode.NotFound);
+                }
+                DoctorDto doctorDto = new DoctorDto
+                {
+                    Id = doctor.Id,
+                    BornDate = doctor.BornDate,
+                    CI = doctor.CI,
+                    Email = doctor.User?.Email ?? "",
+                    Names = doctor.Names,
+                    Surnames = doctor.Surnames,
+					Specialty = doctor.Specialty,
+					Genre = doctor.Genre.ToString(),
+					PhoneNumber = doctor.PhoneNumber
+                };
+                return BaseResponse<DoctorDto>.GetSuccess("Ok", doctorDto, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse<DoctorDto>.GetError(ex.Message, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<BaseResponse<string>> PatchDoctorAsync(long doctorId, PatchDoctorDto patchDoctorRequest)
 		{
 			try
 			{
@@ -209,6 +252,18 @@ namespace CardioTrackAPI.Services
 				if(!string.IsNullOrEmpty(patchDoctorRequest.BornDate))
 				{
 					doctorToPatch.BornDate = DateTime.ParseExact(patchDoctorRequest.BornDate, "yyyy/MM/dd", CultureInfo.InvariantCulture);
+				}
+				if(!string.IsNullOrEmpty(patchDoctorRequest.Genre))
+				{
+                    if (patchDoctorRequest.Genre != "M" && patchDoctorRequest.Genre != "F")
+                    {
+                        throw new ArgumentException("Genre is invalid");
+                    }
+                    doctorToPatch.Genre = char.Parse(patchDoctorRequest.Genre);
+				}
+				if(!string.IsNullOrEmpty(patchDoctorRequest.PhoneNumber))
+				{
+					doctorToPatch.PhoneNumber = patchDoctorRequest.PhoneNumber;
 				}
 
 				await _dBContext.SaveChangesAsync();
@@ -270,8 +325,16 @@ namespace CardioTrackAPI.Services
 				{
 					throw new ArgumentException("Borndate is required");
 				}
+				if (string.IsNullOrEmpty(updateDoctorRequest.Genre))
+				{
+					throw new ArgumentException("Genre is required");
+				}
+                if (updateDoctorRequest.Genre != "M" && updateDoctorRequest.Genre != "F")
+                {
+                    throw new ArgumentException("Genre is invalid");
+                }
 
-				Doctor? doctorToEdit = await _dBContext.Doctor
+                Doctor? doctorToEdit = await _dBContext.Doctor
 				.Include(doctor => doctor.User)
 				.Where(doctor => doctor.Id == doctorId)
 				.FirstOrDefaultAsync();
@@ -287,6 +350,11 @@ namespace CardioTrackAPI.Services
 				doctorToEdit.CI = updateDoctorRequest.CI;
 				doctorToEdit.User!.Email = updateDoctorRequest.Email;
 				doctorToEdit.User!.Password = BCrypt.Net.BCrypt.HashPassword(updateDoctorRequest.Password);
+				doctorToEdit.Genre = char.Parse(updateDoctorRequest.Genre);
+				if(!string.IsNullOrEmpty(updateDoctorRequest.PhoneNumber))
+				{
+					doctorToEdit.PhoneNumber = updateDoctorRequest.PhoneNumber;
+				}
 
 				await _dBContext.SaveChangesAsync();
 				return BaseResponse<string>.GetSuccess("Ok", "Edited", HttpStatusCode.OK);

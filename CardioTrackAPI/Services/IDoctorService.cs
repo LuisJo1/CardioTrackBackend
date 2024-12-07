@@ -5,6 +5,7 @@ namespace CardioTrackAPI.Services
 {
     public interface IDoctorService
 	{
+		Task<BaseResponse<DoctorDto>> GetDoctorByUserIdAsync(long userId);
 		Task<BaseResponse<string>> AddDoctorAsync(AddDoctorDto addDoctorRequest);
 		Task<BaseResponse<DoctorDto>> GetDoctorAsync(long doctorId);
 		Task<BaseResponse<string>> DeleteDoctorAsync(long doctorId);

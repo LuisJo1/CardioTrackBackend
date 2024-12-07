@@ -2,12 +2,14 @@
 using CardioTrackAPI.Model;
 using CardioTrackAPI.Model.Dtos.Patient;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Digests;
 using System.Globalization;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace CardioTrackAPI.Services
 {
-	public class PatientService : IPatientService
+    public class PatientService : IPatientService
 	{
 		private readonly DBContext _dBContext;
 
@@ -83,12 +85,13 @@ namespace CardioTrackAPI.Services
 
 				Patient PatientToAdd = new Patient()
 				{
-					BornDate = DateTime.ParseExact(addPatientRequest.BornDate, "yyyy/MM/dd", CultureInfo.InvariantCulture),
+					BornDate = DateTime.Parse(addPatientRequest.BornDate),
 					CI = addPatientRequest.CI,
 					Names = addPatientRequest.Names,
 					Surnames = addPatientRequest.Surnames,
 					UserId = userToAdd.Id,
-					Genre = char.Parse(addPatientRequest.Genre)
+					Genre = char.Parse(addPatientRequest.Genre),
+					IsBeingEvaluated = addPatientRequest.IsBeingEvaluated,
 				};
 
 				_dBContext.Patient.Add(PatientToAdd);
@@ -153,13 +156,15 @@ namespace CardioTrackAPI.Services
 
 				PatientDto PatientDto = new PatientDto
 				{
+					Id = patient.Id,
 					BornDate = patient.BornDate,
 					CI = patient.CI,
 					Email = patient.User?.Email ?? "",
 					Names = patient.Names,
 					Surnames = patient.Surnames,
 					Genre = patient.Genre,
-					Age = patientAge
+					Age = patientAge,
+					IsBeingEvaluated = patient.IsBeingEvaluated
 				};
 				return BaseResponse<PatientDto>.GetSuccess("Ok", PatientDto, HttpStatusCode.OK);
 			}
@@ -169,55 +174,100 @@ namespace CardioTrackAPI.Services
 			}
 		}
 
-		public async Task<BaseResponse<SearchWithFilters<PatientDto>>> GetPatientsWithFilters(int sliceIndex, int sliceSize, PatientSearchFilters filters)
-		{
-			try
-			{
-				IQueryable<Patient> patientsQuery = _dBContext.Patient
-					.Include(patient => patient.User);
+        public async Task<BaseResponse<PatientDto>> GetPatientByUserIdAsync(long userId)
+        {
+            try
+            {
+                Patient? patient = await _dBContext.Patient
+                    .Include(patient => patient.User)
+                    .Where(patient => patient.UserId == userId)
+                    .FirstOrDefaultAsync();
+                if (patient is null)
+                {
+                    return BaseResponse<PatientDto>.GetError("Couldn't find a Patient with the given id", HttpStatusCode.NotFound);
+                }
+                int patientAge = DateTime.Now.Year - patient.BornDate.Year;
+                if (DateTime.Now.Month < patient.BornDate.Month ||
+                (DateTime.Now.Month == patient.BornDate.Month && DateTime.Now.Day < patient.BornDate.Day)) patientAge--;
 
-				if(!string.IsNullOrEmpty(filters.CI))
+                PatientDto PatientDto = new PatientDto
+                {
+                    Id = patient.Id,
+                    BornDate = patient.BornDate,
+                    CI = patient.CI,
+                    Email = patient.User?.Email ?? "",
+                    Names = patient.Names,
+                    Surnames = patient.Surnames,
+                    Genre = patient.Genre,
+                    Age = patientAge,
+					IsBeingEvaluated = patient.IsBeingEvaluated
+                };
+                return BaseResponse<PatientDto>.GetSuccess("Ok", PatientDto, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse<PatientDto>.GetError(ex.Message, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<BaseResponse<SearchWithFilters<PatientDto>>> GetPatientsWithFilters(int sliceIndex, int sliceSize, PatientSearchFilters filters)
+        {
+            try
+            {
+                IQueryable<Patient> patientsQuery = _dBContext.Patient
+                    .Include(patient => patient.User);
+
+                string? trimmedSearchTerm = filters.SearchTerm?.Replace(" ", "").Replace(".", "");
+
+                if (!string.IsNullOrEmpty(trimmedSearchTerm))
+                {
+                    // Combine search conditions into a single query using OR
+                    patientsQuery = patientsQuery.Where(p =>
+                        (p.Names.Replace(" ", "") + p.Surnames.Replace(" ", "")).ToLower().Contains(trimmedSearchTerm.ToLower()) ||
+                        p.CI.Replace(".", "").Contains(trimmedSearchTerm)
+                    );
+                }
+				if (filters.IsBeingEvaluated is not null)
 				{
-					patientsQuery = patientsQuery.Where(patient => patient.CI == filters.CI);
+					patientsQuery = patientsQuery.Where(p => p.IsBeingEvaluated == filters.IsBeingEvaluated);
 				}
-				if(!string.IsNullOrEmpty(filters.FullName))
-				{
-					string trimmedFullName = filters.FullName.Replace(" ", string.Empty);
-					patientsQuery = patientsQuery.Where(patient => patient.Names.Replace(" ", string.Empty).ToLower()+patient.Surnames.Replace(" ", string.Empty).ToLower() == trimmedFullName.ToLower());
-				}
-				int searchResults = await patientsQuery.CountAsync();
 
-				patientsQuery = patientsQuery.Skip((sliceIndex - 1) * sliceSize)
-				.Take(sliceSize);
+				int totalResults = await patientsQuery.CountAsync();
+                patientsQuery = patientsQuery.Skip((sliceIndex - 1) * sliceSize).Take(sliceSize);
 
-				List<PatientDto> result = new List<PatientDto>();
 
-				await foreach(Patient patient in patientsQuery.AsAsyncEnumerable())
-				{
-					int patientAge = DateTime.Now.Year - patient.BornDate.Year;
-					if (DateTime.Now.Month < patient.BornDate.Month ||
-					(DateTime.Now.Month == patient.BornDate.Month && DateTime.Now.Day < patient.BornDate.Day)) patientAge--;
-					PatientDto patientDto = new PatientDto()
-					{
-						Age = patientAge,
-						BornDate = patient.BornDate,
-						CI = patient.CI,
-						Email = patient.User?.Email ?? "",
-						Names = patient.Names,
-						Surnames = patient.Surnames,
-						Genre = patient.Genre
-					};
-					result.Add(patientDto);
-				}
-				return BaseResponse<SearchWithFilters<PatientDto>>.GetSuccess("Ok", new SearchWithFilters<PatientDto>(result, searchResults), HttpStatusCode.OK);
-			}
-			catch (Exception ex)
-			{
-				return BaseResponse<SearchWithFilters<PatientDto>>.GetError(ex.Message, HttpStatusCode.InternalServerError);
-			}
-		}
+                List<PatientDto> result = await patientsQuery.Select(patient => new PatientDto
+                {
+                    Id = patient.Id,
+                    Age = CalculateAge(patient.BornDate), // Helper function for age calculation
+                    BornDate = patient.BornDate,
+                    CI = patient.CI,
+                    Email = patient.User!.Email ?? "",
+                    Names = patient.Names,
+                    Surnames = patient.Surnames,
+                    Genre = patient.Genre,
+                    IsBeingEvaluated = patient.IsBeingEvaluated
+                }).ToListAsync();
 
-		public async Task<BaseResponse<string>> PatchPatientAsync(long PatientId, PatchPatientDto patchPatientRequest)
+
+                return BaseResponse<SearchWithFilters<PatientDto>>.GetSuccess("Ok", new SearchWithFilters<PatientDto>(result, totalResults), HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return BaseResponse<SearchWithFilters<PatientDto>>.GetError(ex.Message, HttpStatusCode.InternalServerError);
+            }
+        }
+        private static int CalculateAge(DateTime birthDate)
+        {
+            int age = DateTime.Now.Year - birthDate.Year;
+            if (DateTime.Now.Month < birthDate.Month || (DateTime.Now.Month == birthDate.Month && DateTime.Now.Day < birthDate.Day))
+            {
+                age--;
+            }
+            return age;
+        }
+
+        public async Task<BaseResponse<string>> PatchPatientAsync(long PatientId, PatchPatientDto patchPatientRequest)
 		{
 			try
 			{
@@ -276,6 +326,10 @@ namespace CardioTrackAPI.Services
 						throw new ArgumentException("Genre is invalid");
 					}
 					PatientToPatch.Genre = char.Parse(patchPatientRequest.Genre);
+				}
+				if(patchPatientRequest.IsBeingEvaluated is not null)
+				{
+					PatientToPatch.IsBeingEvaluated = (bool)patchPatientRequest.IsBeingEvaluated;
 				}
 				await _dBContext.SaveChangesAsync();
 				return BaseResponse<string>.GetSuccess("Ok", "patched", HttpStatusCode.OK);
@@ -361,6 +415,7 @@ namespace CardioTrackAPI.Services
 				PatientToEdit.User!.Email = updatePatientRequest.Email;
 				PatientToEdit.User!.Password = BCrypt.Net.BCrypt.HashPassword(updatePatientRequest.Password);
 				PatientToEdit.Genre = char.Parse(updatePatientRequest.Genre);
+				PatientToEdit.IsBeingEvaluated = updatePatientRequest.IsBeingEvaluated;
 
 				await _dBContext.SaveChangesAsync();
 				return BaseResponse<string>.GetSuccess("Ok", "Edited", HttpStatusCode.OK);
@@ -374,5 +429,49 @@ namespace CardioTrackAPI.Services
 				return BaseResponse<string>.GetError(ex.Message, HttpStatusCode.InternalServerError);
 			}
 		}
-	}
+
+        public async Task<BaseResponse<DoctorAttendingDto>> GetDoctorAttending(long patientId)
+        {
+			try
+			{
+				Patient? patientRequesting = await _dBContext.Patient.Include(p => p.Doctor)
+					.Where(p => p.Id == patientId).FirstOrDefaultAsync();
+				if(patientRequesting == null)
+				{
+					return BaseResponse<DoctorAttendingDto>.GetError("Coulnd't find a user with the given id", HttpStatusCode.NotFound);
+				}
+				if(!patientRequesting.IsBeingEvaluated)
+				{
+                    return BaseResponse<DoctorAttendingDto>.GetError("Patient is not being evaluated", HttpStatusCode.NotFound);
+                }
+				if(patientRequesting.Doctor == null)
+				{
+                    return BaseResponse<DoctorAttendingDto>.GetError("Coulnd't find a doctor associated with the patient", HttpStatusCode.NotFound);
+                }
+
+
+				int examCount = await _dBContext.Exam.Where(e => e.DoctorId == patientRequesting.Doctor.Id && e.PatientId == patientRequesting.Id)
+					.CountAsync();
+
+				DoctorPatients? dp = await _dBContext.DoctorPatients.Where(d => d.DoctorId == patientRequesting.DoctorId && d.PatientId == patientRequesting.Id)
+					.FirstOrDefaultAsync();
+
+
+				DoctorAttendingDto doctorAttendingDto = new DoctorAttendingDto()
+				{
+					DoctorName = $"{patientRequesting.Doctor!.Names} {patientRequesting.Doctor.Surnames}",
+					DoctorSpecialty = patientRequesting.Doctor!.Specialty,
+					examsCount = examCount,
+					IssueDate = dp?.IssueDate ?? DateTime.MinValue,
+				};
+
+				return BaseResponse<DoctorAttendingDto>.GetSuccess("Ok", doctorAttendingDto, HttpStatusCode.OK);
+
+			}
+			catch (Exception ex)
+			{
+				return BaseResponse<DoctorAttendingDto>.GetError(ex.Message, HttpStatusCode.InternalServerError);
+			}
+        }
+    }
 }

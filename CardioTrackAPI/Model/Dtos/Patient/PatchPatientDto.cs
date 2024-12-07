@@ -9,5 +9,6 @@
 		public string? CI { get; set; } = string.Empty;
 		public string? BornDate { get; set; } = string.Empty;
 		public string? Genre { get; set; }
-	}
+        public bool? IsBeingEvaluated { get; set; }
+    }
 }

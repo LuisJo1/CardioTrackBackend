@@ -1,21 +1,27 @@
 ﻿using CardioTrackAPI.Model;
 using CardioTrackAPI.Model.Dtos.Doctor;
+using CardioTrackAPI.Model.Dtos.DoctorPatients;
 using CardioTrackAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CardioTrackAPI.Controllers
 {
-    [Route("[controller]")]
+	[Route("[controller]")]
 	[ApiController]
 	public class DoctorController : ControllerBase
 	{
 		private readonly IDoctorService _doctorService;
+		private readonly IDoctorPatientsService _doctorPatientsService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public DoctorController(IDoctorService doctorService)
+        public DoctorController(IDoctorService doctorService, IDoctorPatientsService doctorPatientsService, IHttpContextAccessor httpContextAccessor)
 		{
 			_doctorService = doctorService;
-		}
+			_doctorPatientsService = doctorPatientsService;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
 		[HttpPost]
 		[Route("AddDoctor")]
@@ -60,5 +66,27 @@ namespace CardioTrackAPI.Controllers
 			BaseResponse<string> serviceResp = await _doctorService.DeleteDoctorAsync(doctorId);
 			return Ok(serviceResp);
 		}
-	}
+		[HttpPost]
+		[Route("AddPatientToDoctorList")]
+		[Authorize("default-policy", Roles = $"{Roles.Doctor}")]
+		public async Task<ActionResult<BaseResponse<string>>> AddPatientToDoctorList([FromQuery]long patientId)
+		{
+			string userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Sid)!.Value;
+			BaseResponse<string> serviceResp = await _doctorPatientsService.AddPatientToDoctorAsync(patientId, long.Parse(userId));
+			return Ok(serviceResp);
+		}
+		[HttpGet]
+		[Route("GetDoctorPatientsWithFilters")]
+        [Authorize("default-policy", Roles = $"{Roles.Doctor}")]
+		public async Task<IActionResult> GetDoctorPatientsWithFilters(int sliceIndex = 1, int sliceSize = 10, string? patientFullName ="")
+		{
+            string userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Sid)!.Value;
+            BaseResponse<SearchWithFilters<DoctorPatientDto>> serviceResp = await _doctorPatientsService
+				.GetDoctorPatientsWithFilters(long.Parse(userId),sliceIndex, sliceSize, new DoctorPatientsSearchFilters()
+				{
+					PatientFullName = patientFullName
+				});
+			return Ok(serviceResp);
+		}
+    }
 }

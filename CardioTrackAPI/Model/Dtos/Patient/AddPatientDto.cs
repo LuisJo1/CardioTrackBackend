@@ -9,6 +9,7 @@
 		public string Surnames { get; set; } = string.Empty;
 		public string CI { get; set; } = string.Empty;
 		public string BornDate { get; set; } = string.Empty;
-		public string Genre { get; set; }
+		public string Genre { get; set; } = string.Empty;
+		public bool IsBeingEvaluated { get; set; }
 	}
 }

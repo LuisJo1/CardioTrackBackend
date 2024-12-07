@@ -19,7 +19,8 @@ namespace CardioTrackAPI.Controllers
 
 		[HttpPost]
 		[Route("AddPatient")]
-		public async Task<ActionResult<BaseResponse<string>>> AddPatient(AddPatientDto addPatientRequest)
+        [Authorize("default-policy")]
+        public async Task<ActionResult<BaseResponse<string>>> AddPatient(AddPatientDto addPatientRequest)
 		{
 			BaseResponse<string> serviceResp = await _patientService.AddPatientAsync(addPatientRequest);
 			return Ok(serviceResp);
@@ -27,7 +28,7 @@ namespace CardioTrackAPI.Controllers
 
 		[HttpPut]
 		[Route("UpdatePatient")]
-		[Authorize("default-policy", Roles = $"{Roles.Patient}, {Roles.Admin}")]
+		[Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}")]
 		public async Task<ActionResult<BaseResponse<string>>> UpdatePatient([FromQuery] long patientId, [FromBody] UpdatePatientDto updatePatientRequest)
 		{
 			BaseResponse<string> serviceResp = await _patientService.UpdatePatientAsync(patientId, updatePatientRequest);
@@ -36,7 +37,7 @@ namespace CardioTrackAPI.Controllers
 
 		[HttpPatch]
 		[Route("PatchPatient")]
-		[Authorize("default-policy", Roles = $"{Roles.Patient}, {Roles.Admin}")]
+		[Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}")]
 		public async Task<ActionResult<BaseResponse<string>>> PatchPatient([FromQuery] long patientId, [FromBody] PatchPatientDto patchPatientRequest)
 		{
 			BaseResponse<string> serviceResp = await _patientService.PatchPatientAsync(patientId, patchPatientRequest);
@@ -51,13 +52,16 @@ namespace CardioTrackAPI.Controllers
 			return Ok(serviceResp);
 		}
 		[HttpGet]
-		[Route("GetPatientWithFilters")]
-		public async Task<IActionResult> GetPatientWithFilters([FromQuery]int sliceIndex = 1, [FromQuery]int sliceSize = 10, string? ci = "", string? fullName = "")
+        [Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}")]
+        [Route("GetPatientWithFilters")]
+		public async Task<IActionResult> GetPatientWithFilters([FromQuery]int sliceIndex = 1, [FromQuery]int sliceSize = 10, string? ci = "", string? fullName = "", bool? isBeingEvaluated = null, string? searchTerm = "")
 		{
 			BaseResponse<SearchWithFilters<PatientDto>> serviceResp = await _patientService.GetPatientsWithFilters(sliceIndex, sliceSize, new PatientSearchFilters
 			{
 				CI = ci,
-				FullName = fullName
+				FullName = fullName,
+				SearchTerm = searchTerm,
+				IsBeingEvaluated = isBeingEvaluated
 			});
 
 			return Ok(serviceResp);
@@ -72,5 +76,13 @@ namespace CardioTrackAPI.Controllers
 			BaseResponse<string> serviceResp = await _patientService.DeletePatientAsync(patientId);
 			return Ok(serviceResp);
 		}
-	}
+		[HttpGet]
+		[Route("GetDoctorAttending")]
+		[Authorize("default-policy")]
+		public async Task<ActionResult<BaseResponse<DoctorAttendingDto>>> GetDoctorAttending([FromQuery]long patientId)
+        {
+			BaseResponse<DoctorAttendingDto> serviceResp = await _patientService.GetDoctorAttending(patientId);
+            return Ok(serviceResp);
+        }
+    }
 }
