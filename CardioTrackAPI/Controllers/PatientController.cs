@@ -19,7 +19,6 @@ namespace CardioTrackAPI.Controllers
 
 		[HttpPost]
 		[Route("AddPatient")]
-        [Authorize("default-policy")]
         public async Task<ActionResult<BaseResponse<string>>> AddPatient(AddPatientDto addPatientRequest)
 		{
 			BaseResponse<string> serviceResp = await _patientService.AddPatientAsync(addPatientRequest);
