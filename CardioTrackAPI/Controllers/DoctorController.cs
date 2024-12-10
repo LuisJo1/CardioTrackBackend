@@ -78,13 +78,13 @@ namespace CardioTrackAPI.Controllers
 		[HttpGet]
 		[Route("GetDoctorPatientsWithFilters")]
         [Authorize("default-policy", Roles = $"{Roles.Doctor}")]
-		public async Task<IActionResult> GetDoctorPatientsWithFilters(int sliceIndex = 1, int sliceSize = 10, string? patientFullName ="")
+		public async Task<IActionResult> GetDoctorPatientsWithFilters(int sliceIndex = 1, int sliceSize = 10, string? searchTerm ="")
 		{
             string userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Sid)!.Value;
             BaseResponse<SearchWithFilters<DoctorPatientDto>> serviceResp = await _doctorPatientsService
 				.GetDoctorPatientsWithFilters(long.Parse(userId),sliceIndex, sliceSize, new DoctorPatientsSearchFilters()
 				{
-					PatientFullName = patientFullName
+					SearchTerm = searchTerm
 				});
 			return Ok(serviceResp);
 		}

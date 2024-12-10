@@ -1,4 +1,5 @@
-﻿using CardioTrackAPI.Model.Dtos.PersonalBackground;
+﻿using CardioTrackAPI.Model.Dtos.Doctor;
+using CardioTrackAPI.Model.Dtos.PersonalBackground;
 
 namespace CardioTrackAPI.Model.Dtos.Exam
 {
@@ -8,5 +9,6 @@ namespace CardioTrackAPI.Model.Dtos.Exam
         public string InterventionProposed { get; set; } = string.Empty;
         public PersonalBackgroundDto? PersonalBackground { get; set; }
         public DateTime EvaluationDate { get; set; }
+        public DoctorDto? Doctor { get; set; }
     }
 }

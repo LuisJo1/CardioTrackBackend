@@ -331,6 +331,10 @@ namespace CardioTrackAPI.Services
 				{
 					PatientToPatch.IsBeingEvaluated = (bool)patchPatientRequest.IsBeingEvaluated;
 				}
+				if(patchPatientRequest.DoctorId != null && patchPatientRequest.DoctorId != 0)
+				{
+					PatientToPatch.DoctorId = patchPatientRequest.DoctorId;
+				}
 				await _dBContext.SaveChangesAsync();
 				return BaseResponse<string>.GetSuccess("Ok", "patched", HttpStatusCode.OK);
 			}
@@ -397,7 +401,8 @@ namespace CardioTrackAPI.Services
 					throw new ArgumentException("Genre is invalid");
 				}
 
-				Patient? PatientToEdit = await _dBContext.Patient
+
+                Patient? PatientToEdit = await _dBContext.Patient
 				.Include(Patient => Patient.User)
 				.Where(Patient => Patient.Id == PatientId)
 				.FirstOrDefaultAsync();

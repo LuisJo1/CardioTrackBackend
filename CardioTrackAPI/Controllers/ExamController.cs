@@ -58,7 +58,7 @@ namespace CardioTrackAPI.Controllers
         [HttpGet]
         [Route("GetTreatmentsWithFilters")]
         [Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}, {Roles.Patient}")]
-        public async Task<IActionResult> GetTreatmentsWithFilters(int sliceIndex = 1, int sliceSize = 10, int? patientId = null, int? examId = null, bool getLatest = false, int? treatmentId = 0)
+        public async Task<IActionResult> GetTreatmentsWithFilters(int sliceIndex = 1, int sliceSize = 10, int? patientId = null, int? examId = null, bool getLatest = false, int? treatmentId = 0, bool getAll = false)
         {
             BaseResponse<SearchWithFilters<TreatmentDto>> serviceResp = await _treatmentService
                 .GetTreatmentsWithFilters(sliceIndex, sliceSize, new TreatmentSearchFilters()
@@ -66,7 +66,8 @@ namespace CardioTrackAPI.Controllers
                     ExamId = examId,
                     PatientId = patientId,
 					GetLatest = getLatest,
-					TreatmentId = treatmentId
+					TreatmentId = treatmentId,
+					GetAll = getAll
                 });
             return Ok(serviceResp);
         }

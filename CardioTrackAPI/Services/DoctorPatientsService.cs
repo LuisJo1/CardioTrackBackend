@@ -51,7 +51,8 @@ namespace CardioTrackAPI.Services
 
                 BaseResponse<string> patientPatchResp = await _patientService.PatchPatientAsync(patient.Id, new PatchPatientDto()
                 {
-                    IsBeingEvaluated = true
+                    IsBeingEvaluated = true,
+                    DoctorId = doctor.Id
                 });
 
                 if(!patientPatchResp.Success)
@@ -78,11 +79,13 @@ namespace CardioTrackAPI.Services
                 IQueryable<DoctorPatients> doctorPatientsQuery = _dBContext.DoctorPatients.Include(dp => dp.Doctor)
                     .Include(dp => dp.Patient);
 
-                if(!string.IsNullOrEmpty(searchFilters.PatientFullName))
+                doctorPatientsQuery = doctorPatientsQuery.Where(dp => dp.DoctorId == doctor.Id);
+
+                if(!string.IsNullOrEmpty(searchFilters.SearchTerm))
                 {
-                    string trimmedFilter = searchFilters.PatientFullName.Replace(" ", "");
+                    string trimmedFilter = searchFilters.SearchTerm.Replace(" ", "").Replace(".", "");
                     doctorPatientsQuery = doctorPatientsQuery.
-                        Where(dp => (dp.Patient!.Names.Replace(" ", "") + dp.Patient.Surnames.Replace(" ", "")).ToLower().Contains(trimmedFilter.ToLower()));
+                        Where(dp => (dp.Patient!.Names.Replace(" ", "") + dp.Patient.Surnames.Replace(" ", "")).ToLower().Contains(trimmedFilter.ToLower()) || dp.Patient.CI.Contains(trimmedFilter));
                 }
 
                 int totalResults = await doctorPatientsQuery.CountAsync();

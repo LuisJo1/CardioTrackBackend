@@ -12,6 +12,5 @@ namespace CardioTrackAPI.Services
 
         Task<BaseResponse<string>> UpdateTreatmentMedicines(List<TreatmentMedicineDto> treatmentMedicineDtos);
 
-
     }
 }

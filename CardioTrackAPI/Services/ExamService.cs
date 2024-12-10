@@ -106,8 +106,13 @@ namespace CardioTrackAPI.Services
 
 				int searchResults = await examsQuery.CountAsync();
 
+				examsQuery = examsQuery.OrderByDescending(e => e.EvaluationDate);
+				
+				if(!searchFilters.GetAll)
+				{
 				examsQuery = examsQuery.Skip((sliceIndex - 1) * sliceSize)
 					.Take(sliceSize);
+				}
 
 				List<ExamDto> examDtos = await examsQuery.Select(e => new ExamDto()
 				{

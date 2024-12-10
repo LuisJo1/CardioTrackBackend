@@ -6,5 +6,6 @@
         public long? PatientId { get; set; }
         public bool GetLatest { get; set; }
         public long? TreatmentId { get; set; }
+        public bool GetAll { get; set; }
     }
 }

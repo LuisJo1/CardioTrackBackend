@@ -70,6 +70,7 @@ namespace CardioTrackAPI.Services
 			try
 			{
 				IQueryable<Treatment> treatmentsQuery = _dBContext.Treatment
+					.OrderByDescending(t => t.AdditionTime)
 					.Include(t => t.treatmentMedicines)
 					.Include(t => t.Exam)
 					.ThenInclude(e => e!.Doctor);
@@ -93,11 +94,11 @@ namespace CardioTrackAPI.Services
 
                 int searchResults = await treatmentsQuery.CountAsync();
 
-				if(!searchFilters.GetLatest)
+				if(!searchFilters.GetLatest && !searchFilters.GetAll)
 				{
 						treatmentsQuery = treatmentsQuery.Skip((sliceIndex - 1) * sliceSize)
 					.Take(sliceSize);
-				} else
+				} else if(!searchFilters.GetAll && searchFilters.GetLatest)
 				{
                     treatmentsQuery = treatmentsQuery.Take(1);
                 }
@@ -119,7 +120,7 @@ namespace CardioTrackAPI.Services
 						Duration = tm.Duration,
 						DurationParameter = tm.DurationParatemeter,
 						Id = tm.Id,
-						MedicineName = tm.MedicineName,
+						MedicineName = tm.MedicineName.Substring(0,1).ToUpper() + tm.MedicineName.Substring(1),
 						TakeEvery = tm.TakeEvery,
 						TreatmentId = tm.TreatmentId,
 					}).ToList() ?? null

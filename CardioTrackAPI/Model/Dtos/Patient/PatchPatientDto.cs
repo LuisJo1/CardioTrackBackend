@@ -10,5 +10,6 @@
 		public string? BornDate { get; set; } = string.Empty;
 		public string? Genre { get; set; }
         public bool? IsBeingEvaluated { get; set; }
+		public long? DoctorId { get; set; }
     }
 }
