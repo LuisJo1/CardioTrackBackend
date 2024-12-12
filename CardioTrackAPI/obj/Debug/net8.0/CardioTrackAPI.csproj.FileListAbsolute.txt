@@ -147,6 +147,8 @@ C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\CardioTrackAPI.runtimeconfig.json
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\CardioTrackAPI.dll
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\CardioTrackAPI.pdb
+C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\AWSSDK.Core.dll
+C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\AWSSDK.S3.dll
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\rodri\source\repos\CardioTrackAPI\CardioTrackBackend\CardioTrackAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll

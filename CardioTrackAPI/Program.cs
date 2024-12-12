@@ -1,6 +1,7 @@
 using CardioTrackAPI.Data;
 using CardioTrackAPI.Model;
 using CardioTrackAPI.Services;
+using CTalk.AppServices;
 using System.Text;
 using System.Text.Json;
 
@@ -20,6 +21,7 @@ namespace CardioTrackAPI
 
 			builder.Services.AddScoped<IDoctorService, DoctorService>();
 			builder.Services.AddScoped<IPatientService, PatientService>();
+			builder.Services.AddScoped<IStorageService, StorageService>();
 			builder.Services.AddScoped<IExamService, ExamService>();
 			builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 			builder.Services.AddScoped<IDoctorPatientsService, DoctorPatientsService>();

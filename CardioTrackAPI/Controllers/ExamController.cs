@@ -35,8 +35,8 @@ namespace CardioTrackAPI.Controllers
 		}
 		[HttpGet]
 		[Route("GetExamsWithFilters")]
-		[Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}")]
-		public async Task<IActionResult> GetExamsWithFilters(int sliceIndex = 1, int sliceSize = 10, int? doctorId = null, int? patientId = null, int? examId = null)
+		[Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}, {Roles.Patient}")]
+		public async Task<IActionResult> GetExamsWithFilters(int sliceIndex = 1, int sliceSize = 10, int? doctorId = null, int? patientId = null, int? examId = null, bool getAll = false)
 		{
 			BaseResponse<SearchWithFilters<ExamDto>> serviceResp = await _examService
 				.GetExamsWithFilters(sliceIndex, sliceSize, new ExamSearchFilters()
@@ -44,6 +44,7 @@ namespace CardioTrackAPI.Controllers
 					DoctorId = doctorId,
 					ExamId = examId,
 					PatientId = patientId,
+					GetAll = getAll
 				});
 			return Ok(serviceResp);
 		}

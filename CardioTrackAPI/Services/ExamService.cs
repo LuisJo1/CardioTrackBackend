@@ -89,17 +89,17 @@ namespace CardioTrackAPI.Services
         {
 			try
 			{
-				IQueryable<Exam> examsQuery = _dBContext.Exam.Include(e => e.personalBackground);
+				IQueryable<Exam> examsQuery = _dBContext.Exam.Include(e => e.personalBackground).Include(e => e.Doctor);
 
-				if(searchFilters.DoctorId != 0)
+				if(searchFilters.DoctorId != 0 && searchFilters.DoctorId != null)
 				{
 					examsQuery = examsQuery.Where(e => e.DoctorId == searchFilters.DoctorId);
 				}
-				if(searchFilters.PatientId != 0)
+				if(searchFilters.PatientId != 0 && searchFilters.PatientId != null)
 				{
 					examsQuery = examsQuery.Where(e => e.PatientId == searchFilters.PatientId);
 				}
-				if(searchFilters.ExamId != 0)
+				if(searchFilters.ExamId != 0 && searchFilters.ExamId != null)
 				{
 					examsQuery = examsQuery.Where(e => e.Id == searchFilters.ExamId);
 				}
@@ -119,7 +119,18 @@ namespace CardioTrackAPI.Services
 					Id = e.Id,
 					EvaluationDate = e.EvaluationDate,
 					InterventionProposed = e.InterventionProposed,
-					PersonalBackground = new PersonalBackgroundDto() {
+                    Doctor = new Model.Dtos.Doctor.DoctorDto()
+                    {
+                        BornDate = e.Doctor!.BornDate,
+                        CI = e.Doctor.CI,
+                        Genre = e.Doctor.Genre.ToString(),
+                        PhoneNumber = e.Doctor.PhoneNumber,
+                        Id = e.Doctor.Id,
+                        Names = e.Doctor.Names,
+                        Surnames = e.Doctor.Surnames,
+                        Specialty = e.Doctor.Specialty
+                    },
+                    PersonalBackground = new PersonalBackgroundDto() {
 						ArterialHypertension = e.personalBackground!.ArterialHypertension,
 						MyocardialInfarction = e.personalBackground!.MyocardialInfarction,
 						Asthma = e.personalBackground!.Asthma,

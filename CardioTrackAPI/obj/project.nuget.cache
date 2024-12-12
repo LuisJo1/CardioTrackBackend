@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "364a+Wx0saQ2Fjendo4abTOu22UJD31EyfZDAC4PFPd2TRurqKNZUQR+Uhx83WPlz9jgHB250i7VorPvdKtuIg==",
+  "dgSpecHash": "5JMBFkAmmI5WKRQ5vSOg11rF179faNSj1X+jESLCyG+Igm/sUP9mIETqx8cwXsEOSC1EN5txf7Y77b3vHo6ysA==",
   "success": true,
   "projectFilePath": "C:\\Users\\rodri\\source\\repos\\CardioTrackAPI\\CardioTrackBackend\\CardioTrackAPI\\CardioTrackAPI.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\rodri\\.nuget\\packages\\awssdk.core\\3.7.400.61\\awssdk.core.3.7.400.61.nupkg.sha512",
+    "C:\\Users\\rodri\\.nuget\\packages\\awssdk.s3\\3.7.410.3\\awssdk.s3.3.7.410.3.nupkg.sha512",
     "C:\\Users\\rodri\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\rodri\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
     "C:\\Users\\rodri\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",

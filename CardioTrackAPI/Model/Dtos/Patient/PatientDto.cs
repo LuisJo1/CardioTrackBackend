@@ -11,5 +11,6 @@
 		public char Genre { get; set;  }
 		public DateTime BornDate { get; set; }
 		public bool IsBeingEvaluated { get; set; }
+		public string ProfileImgUrl { get; set; } = string.Empty;
 	}
 }

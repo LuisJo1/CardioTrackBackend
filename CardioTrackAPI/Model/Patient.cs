@@ -13,5 +13,8 @@
 		public bool IsBeingEvaluated { get; set; }
 		public long? DoctorId { get; set; }
 		public Doctor? Doctor { get; set; }
+		public string ProfileImgUrl { get; set; } = string.Empty;
+		public string ProfileImgS3Key { get; set; } = string.Empty;
+		public DateTime ProfileImgUrlLastGenerationTime { get; set; }
 	}
 }

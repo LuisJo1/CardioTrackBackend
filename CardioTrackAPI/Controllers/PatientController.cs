@@ -3,6 +3,7 @@ using CardioTrackAPI.Model;
 using CardioTrackAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CTalk.AppServices;
 
 namespace CardioTrackAPI.Controllers
 {
@@ -11,11 +12,13 @@ namespace CardioTrackAPI.Controllers
 	public class PatientController : ControllerBase
 	{
 		private readonly IPatientService _patientService;
+        private readonly IStorageService _storageService;
 
-		public PatientController(IPatientService patientService)
+        public PatientController(IPatientService patientService, IStorageService storageService)
 		{
 			_patientService = patientService;
-		}
+            _storageService = storageService;
+        }
 
 		[HttpPost]
 		[Route("AddPatient")]
@@ -81,6 +84,22 @@ namespace CardioTrackAPI.Controllers
 		public async Task<ActionResult<BaseResponse<DoctorAttendingDto>>> GetDoctorAttending([FromQuery]long patientId)
         {
 			BaseResponse<DoctorAttendingDto> serviceResp = await _patientService.GetDoctorAttending(patientId);
+            return Ok(serviceResp);
+        }
+		[HttpPatch]
+		[Route("PatchPatientProfilePhoto")]
+		[Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}, {Roles.Patient}")]
+		public async Task<IActionResult> PatchPatientProfilePhoto(PatchPatientProfilePhotoRequest request)
+		{
+			BaseResponse<string> serviceResp = await _storageService.UploadImagesAsync(new List<IFormFile>() { request.File! }, request.PatientId);
+			return Ok(serviceResp);
+		}
+        [HttpDelete]
+        [Route("DeletePatientProfilePhoto")]
+        [Authorize("default-policy", Roles = $"{Roles.Doctor}, {Roles.Admin}, {Roles.Patient}")]
+        public async Task<IActionResult> PatchPatientProfilePhoto(long patientId)
+        {
+            BaseResponse<string> serviceResp = await _storageService.DeletePatientProfilePic(patientId);
             return Ok(serviceResp);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using CardioTrackAPI.Data;
 using CardioTrackAPI.Model;
 using CardioTrackAPI.Model.Dtos.Patient;
+using CTalk.AppServices;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Crypto.Digests;
 using System.Globalization;
@@ -12,11 +13,13 @@ namespace CardioTrackAPI.Services
     public class PatientService : IPatientService
 	{
 		private readonly DBContext _dBContext;
+        private readonly IStorageService _storageService;
 
-		public PatientService(DBContext dBContext)
+        public PatientService(DBContext dBContext, IStorageService storageService)
 		{
 			_dBContext = dBContext;
-		}
+            _storageService = storageService;
+        }
 		public async Task<BaseResponse<string>> AddPatientAsync(AddPatientDto addPatientRequest)
 		{
 			try
@@ -190,6 +193,13 @@ namespace CardioTrackAPI.Services
                 if (DateTime.Now.Month < patient.BornDate.Month ||
                 (DateTime.Now.Month == patient.BornDate.Month && DateTime.Now.Day < patient.BornDate.Day)) patientAge--;
 
+
+				TimeSpan timeSinceProfilePicGenerationTIme = DateTime.Now - patient.ProfileImgUrlLastGenerationTime;
+				if(timeSinceProfilePicGenerationTIme.Days >= 7 && !string.IsNullOrEmpty(patient.ProfileImgUrl))
+				{
+					await _storageService.UpdateMediaPresignedUrlAsync(patient.Id, patient.ProfileImgS3Key);
+				}
+
                 PatientDto PatientDto = new PatientDto
                 {
                     Id = patient.Id,
@@ -200,7 +210,8 @@ namespace CardioTrackAPI.Services
                     Surnames = patient.Surnames,
                     Genre = patient.Genre,
                     Age = patientAge,
-					IsBeingEvaluated = patient.IsBeingEvaluated
+					IsBeingEvaluated = patient.IsBeingEvaluated,
+					ProfileImgUrl = patient.ProfileImgUrl
                 };
                 return BaseResponse<PatientDto>.GetSuccess("Ok", PatientDto, HttpStatusCode.OK);
             }
