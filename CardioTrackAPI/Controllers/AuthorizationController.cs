@@ -62,7 +62,7 @@ namespace CardioTrackAPI.Controllers
 
 				await _httpContextAccessor.HttpContext!.SignInAsync("cookie", User, new AuthenticationProperties
 				{
-					IsPersistent = true
+					IsPersistent = true,
 				});
 
 				return Ok(BaseResponse<string>.GetSuccess("Ok", "", HttpStatusCode.OK));

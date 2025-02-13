@@ -15,12 +15,12 @@ namespace CTalk.AppServices
         private readonly ILogger<IStorageService> _logger;
         private readonly DBContext _dBContext;
         private IAmazonS3 _awsS3Client;
-
         public StorageService(IConfiguration configuration, ILogger<IStorageService> logger, DBContext dBContext)
         {
             AWSConfigsS3.UseSignatureVersion4 = true;
             _awsS3Client = new AmazonS3Client(
-                Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID"), Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY"),
+                configuration.GetValue<string>("AWS:AWS_ACCESS_KEY_ID"),
+                   configuration.GetValue<string>("AWS:AWS_SECRET_ACCESS_KEY"),
                 new AmazonS3Config()
                 {
                     ServiceURL = string.Format("https://s3.filebase.com"),

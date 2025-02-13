@@ -7,101 +7,99 @@ using System.Text.Json;
 
 namespace CardioTrackAPI
 {
-	public class Program
-	{
-		public static async Task Main(string[] args)
-		{
-			var builder = WebApplication.CreateBuilder(args);
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-			builder.Services.AddControllers();
-			builder.Services.AddSwaggerGen();
-			builder.Services.AddDbContext<DBContext>();
-			builder.Services.AddHttpContextAccessor();
-			builder.Services.AddDataProtection();
+            builder.Services.AddCors(config =>
+            {
+                config.AddPolicy(builder.Configuration.GetValue<string>("AppCors:AppCorsPolicyName")!, policy =>
+                {
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyHeader();
+                    policy.AllowCredentials();
+                    policy.WithOrigins(builder.Configuration.GetValue<string>("AppCors:ProductionClientOrigin")!,
+                        builder.Configuration.GetValue<string>("AppCors:DevClientOrigin")!);
+                });
+            });
 
-			builder.Services.AddScoped<IDoctorService, DoctorService>();
-			builder.Services.AddScoped<IPatientService, PatientService>();
-			builder.Services.AddScoped<IStorageService, StorageService>();
-			builder.Services.AddScoped<IExamService, ExamService>();
-			builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
-			builder.Services.AddScoped<IDoctorPatientsService, DoctorPatientsService>();
-			builder.Services.AddScoped<ITreatmentService, TreatmentService>();
+            builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddDbContext<DBContext>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddDataProtection();
 
-			builder.Services.AddAuthentication("cookie")
-				.AddCookie("cookie", options =>
-				{
-					options.Events.OnRedirectToAccessDenied = context =>
-					{
-						context.Response.StatusCode = 403;
-						var bytes = 
-						Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("User doesn't meet the required permissions", System.Net.HttpStatusCode.Forbidden)));
-						context.Response.ContentType = "application/json";
-						context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-						return Task.CompletedTask;
-					};
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IStorageService, StorageService>();
+            builder.Services.AddScoped<IExamService, ExamService>();
+            builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
+            builder.Services.AddScoped<IDoctorPatientsService, DoctorPatientsService>();
+            builder.Services.AddScoped<ITreatmentService, TreatmentService>();
 
-					options.Events.OnRedirectToLogin = context =>
-					{
-						context.Response.StatusCode = 401;
-						var bytes = 
-						Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("Unauthorized", System.Net.HttpStatusCode.Unauthorized)));
-						context.Response.ContentType = "application/json";
-						context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-						return Task.CompletedTask;
-					};
-				});
+            builder.Services.AddAuthentication("cookie")
+    .AddCookie("cookie", options =>
+    {
+        //comment this on production
+        //options.Cookie.SameSite = SameSiteMode.None;
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = 403;
+            var bytes =
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("User doesn't meet the required permissions", System.Net.HttpStatusCode.Forbidden)));
+            context.Response.ContentType = "application/json";
+            context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+            return Task.CompletedTask;
+        };
 
-			builder.Services.AddAuthorization(options =>
-			{
-				options.AddPolicy("default-policy", policy =>
-				{
-					policy.RequireAuthenticatedUser();
-					policy.AuthenticationSchemes = new List<string>() { "cookie" };
-				});
-			});
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = 401;
+            var bytes =
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(BaseResponse<string>.GetError("Unauthorized", System.Net.HttpStatusCode.Unauthorized)));
+            context.Response.ContentType = "application/json";
+            context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+            return Task.CompletedTask;
+        };
+    });
 
-			builder.Services.AddCors(pb =>
-			{
-				pb.AddPolicy("app-cors", options =>
-				{
-					options.WithOrigins("http://localhost:5173");
-					options.AllowCredentials();
-					options.AllowAnyHeader();
-					options.AllowAnyMethod();
-				});
-			});
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("default-policy", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.AuthenticationSchemes = new List<string>() { "cookie" };
+                });
+            });
 
-			var app = builder.Build();
+            var app = builder.Build();
 
-			if(app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+            app.UseSwagger();
 
-			using (var scope = app.Services.CreateScope())
-			{
+            app.UseSwaggerUI();
 
-				var services = scope.ServiceProvider;
-				DBContext dBContext = services.GetRequiredService<DBContext>();
-				await SeedData.LoadDataAsync(dBContext);
-			}
-
-			app.UseHttpsRedirection();
-
-			app.UseAuthorization();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                ILogger? logger = services.GetService<ILogger>();
+                if (logger != null)
+                {
+                    logger.Log(LogLevel.Information, "getting in here");
+                }
+                DBContext dBContext = services.GetRequiredService<DBContext>();
+                await SeedData.LoadDataAsync(dBContext);
+            }
 
 
-			app.MapControllers();
+            app.MapControllers();
+            app.UseCors(builder.Configuration.GetValue<string>("AppCors:AppCorsPolicyName")!);
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-			app.UseAuthentication();
+            app.Run();
 
-			app.UseCors("app-cors");
-
-			app.UseAuthorization();
-
-			app.Run();
-
-		}
-	}
+        }
+    }
 }
