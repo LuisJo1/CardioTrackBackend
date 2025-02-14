@@ -238,7 +238,7 @@ namespace CardioTrackAPI.Services
                         p.CI.Replace(".", "").Contains(trimmedSearchTerm)
                     );
                 }
-				if (filters.IsBeingEvaluated is not null)
+				if (filters.IsBeingEvaluated == true)
 				{
 					patientsQuery = patientsQuery.Where(p => p.IsBeingEvaluated == filters.IsBeingEvaluated);
 				}
