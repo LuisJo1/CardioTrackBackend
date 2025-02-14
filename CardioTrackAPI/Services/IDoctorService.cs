@@ -1,5 +1,6 @@
 ﻿using CardioTrackAPI.Model;
 using CardioTrackAPI.Model.Dtos.Doctor;
+using CardioTrackAPI.Model.Dtos.Patient;
 
 namespace CardioTrackAPI.Services
 {
@@ -11,5 +12,6 @@ namespace CardioTrackAPI.Services
 		Task<BaseResponse<string>> DeleteDoctorAsync(long doctorId);
 		Task<BaseResponse<string>> UpdateDoctorAsync(long doctorId, UpdateDoctorDto updateDoctorRequest);
 		Task<BaseResponse<string>> PatchDoctorAsync(long doctorId, PatchDoctorDto patchDoctorRequest);
-	}
+		Task<BaseResponse<List<DoctorDto>>> GetAllDoctorsAsync();
+    }
 }

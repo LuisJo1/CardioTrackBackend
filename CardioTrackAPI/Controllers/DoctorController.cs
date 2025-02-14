@@ -58,7 +58,16 @@ namespace CardioTrackAPI.Controllers
 			return Ok(serviceResp);
 		}
 
-		[HttpDelete]
+        [HttpGet]
+        [Route("GetAllDoctors")]
+		[Authorize("default-policy", Roles = $"{Roles.Admin}")]
+        public async Task<ActionResult<BaseResponse<DoctorDto>>> GetAllDoctors()
+        {
+            BaseResponse<List<DoctorDto>> serviceResp = await _doctorService.GetAllDoctorsAsync();
+            return Ok(serviceResp);
+        }
+
+        [HttpDelete]
 		[Route("DeleteDoctor")]
 		[Authorize("default-policy", Roles = $"{Roles.Admin}")]
 		public async Task<ActionResult<BaseResponse<DoctorDto>>> DeleteDoctor(long doctorId)
